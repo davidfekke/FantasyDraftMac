@@ -311,7 +311,7 @@ struct PlayerInformationSummaryView: View {
 
                 if !summary.sourceURLs.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(summary.usedFoundationModel ? "Summarized with Apple Foundation Models" : "Foundation Models unavailable; showing source excerpt")
+                        Text(summary.usedFoundationModel ? "This is an AI Summarization" : "Foundation Models unavailable; showing source excerpt")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
