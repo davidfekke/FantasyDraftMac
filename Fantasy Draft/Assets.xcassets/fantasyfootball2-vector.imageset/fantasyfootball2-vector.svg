@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Fantasy football wizard</title>
+  <desc id="desc">A flat-color vector illustration of a blue-robed wizard running with a football while players chase him and a dragon flies over a stadium.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8fb3b8"/><stop offset="1" stop-color="#d5c69b"/></linearGradient>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#657b36"/><stop offset="1" stop-color="#294b2e"/></linearGradient>
+    <linearGradient id="robe" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183e4c"/><stop offset="1" stop-color="#071f2a"/></linearGradient>
+    <style>
+      .ink{stroke:#14282b;stroke-width:12;stroke-linejoin:round;stroke-linecap:round}.thin{stroke:#23393a;stroke-width:7;stroke-linejoin:round;stroke-linecap:round}.mark{fill:none;stroke:#d8d6b0;stroke-width:12;stroke-linecap:round;opacity:.75}
+    </style>
+  </defs>
+
+  <!-- atmosphere and stadium -->
+  <rect width="1536" height="1024" fill="url(#sky)"/>
+  <path d="M0 252Q146 199 292 263T590 253T898 248T1193 254T1536 237V0H0Z" fill="#9fbbc0" opacity=".45"/>
+  <path d="M0 355Q235 309 459 352T849 343T1220 337T1536 320V590H0Z" fill="#40565a"/>
+  <path d="M0 402Q243 359 487 401T907 392T1266 381T1536 366V510H0Z" fill="#526365"/>
+  <g fill="#b18b48" opacity=".36">
+    <circle cx="82" cy="404" r="6"/><circle cx="131" cy="383" r="5"/><circle cx="202" cy="417" r="7"/><circle cx="302" cy="382" r="6"/><circle cx="396" cy="420" r="5"/><circle cx="1127" cy="383" r="6"/><circle cx="1200" cy="413" r="7"/><circle cx="1304" cy="376" r="5"/><circle cx="1410" cy="403" r="7"/>
+  </g>
+  <path d="M0 579H1536V1024H0Z" fill="url(#field)"/>
+  <path d="M0 662Q410 627 808 645T1536 638" fill="none" stroke="#8fa252" stroke-width="28" opacity=".55"/>
+  <path class="mark" d="M27 718L1050 1024M0 903L1462 705M810 665L1453 906M985 829L1192 889"/>
+  <path d="M1269 223V488H1443V210M1360 488V546" fill="none" stroke="#b99132" stroke-width="8"/>
+
+  <!-- dragon silhouette -->
+  <g class="ink" fill="#31483b">
+    <path d="M607 251Q522 210 506 116Q574 184 631 192Q613 132 651 69Q675 139 708 158Q741 70 802 42Q789 134 822 196Q881 157 967 167Q904 212 850 262Q796 319 710 309Z"/>
+    <path d="M493 176Q393 103 251 32Q415 29 466 65Q472 115 451 153Q377 168 303 238Q321 146 278 111Q177 100 77 166Q139 62 73 16Q279 5 413 38Q483 61 493 176Z"/>
+    <path d="M810 134Q956 21 1128 13Q1045 56 1032 90Q1155 44 1326 20Q1230 72 1233 112Q1301 116 1363 160Q1213 125 1134 154Q1058 187 957 227Z"/>
+    <path d="M658 184l-30-50 43 16 18-48 18 48 44-23-18 49q42 20 31 65-10 46-71 66-89 28-135-34-28-39 0-89 30-54 100-20Z"/>
+  </g>
+  <path d="M647 236q31 34 68-1" fill="none" stroke="#9e5c2d" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="713" cy="194" r="8" fill="#e5b652"/>
+
+  <!-- left football player -->
+  <g class="ink">
+    <path d="M101 744Q72 798 46 782Q16 765 48 697L84 618Q105 574 148 583L226 607Q270 622 284 665L327 710Q354 747 323 765Q300 779 274 749L235 718 210 852 156 902 104 858 119 744Z" fill="#e1d4ad"/>
+    <path d="M84 609Q111 563 174 565Q246 564 290 616L251 708Q176 736 94 684Z" fill="#a63f20"/>
+    <path d="M109 858l48 26-26 111q-9 34-38 27-31-8-19-43Z" fill="#18323a"/>
+    <path d="M178 855l45 13-43 92q-17 31-44 15-22-14-4-44Z" fill="#a13c21"/>
+    <ellipse cx="194" cy="496" rx="50" ry="58" fill="#b36b35"/>
+    <path d="M143 493q7-68 54-69 49 1 53 72l-28-17-78 14Z" fill="#ae3e20"/>
+    <path d="M153 485h85v75h-85zM165 505h65M177 486v74M216 484v77" fill="none" stroke="#b6aa7d" stroke-width="8"/>
+  </g>
+  <text x="167" y="665" fill="#d8d3b1" font-family="Arial,sans-serif" font-size="78" font-weight="800" transform="rotate(7 167 665)">9</text>
+
+  <!-- right football player -->
+  <g class="ink">
+    <path d="M1164 605q19-65 82-76 72-12 116 41l52 97q18 43-10 56-28 12-46-32l-27-53-12 125-48 110-56-20 27-111-23-83-21 45q-19 33-46 17-26-16-4-50Z" fill="#d5d4c1"/>
+    <path d="M1210 669q63 30 127-5l-9 112-50 75-66-18Z" fill="#335b68"/>
+    <path d="M1214 839l49 15-20 90q-8 33-38 25-28-8-20-39Z" fill="#24383c"/>
+    <ellipse cx="1266" cy="514" rx="48" ry="54" fill="#9b633d"/>
+    <path d="M1216 510q4-70 54-72 52 8 48 76l-28-17-74 13Z" fill="#d4d6c7"/>
+    <path d="M1220 503h91v62h-91zM1234 522h69M1248 503v62M1289 503v61" fill="none" stroke="#34515a" stroke-width="8"/>
+  </g>
+  <text x="1250" y="647" fill="#315969" font-family="Arial,sans-serif" font-size="69" font-weight="800" transform="rotate(-4 1250 647)">3</text>
+
+  <!-- wizard hat behind the head -->
+  <g class="ink" fill="url(#robe)">
+    <path d="M709 240Q745 132 674 34Q774 68 806 111Q839 71 883 43Q852 114 886 173Q954 194 1137 244Q1078 324 951 330Q827 330 688 288Z"/>
+    <path d="M672 268Q811 215 956 225Q1060 224 1143 264Q1075 347 933 353Q780 357 672 300Z"/>
+  </g>
+
+  <!-- wizard cape and body -->
+  <g class="ink" fill="url(#robe)">
+    <path d="M572 321Q480 277 370 340l51 47q-76 32-91 91l72 2q-72 74-47 142l78-19q-30 75 12 109l111-57 195 73 238-3 4-133q97 83 167 91l-16-72q79 27 130-14l-92-78q-60-142-189-208-91-47-231-20Z"/>
+    <path d="M530 628q-116 47-229 116l77 19q-72 44-58 94l104-2q-82 86-63 127 32 48 119-52l-12 83q90 15 146-72 52 80 181 58l-7-54q70 39 114-4l-52-111q-35-105-144-173Z"/>
+    <path d="M695 738q98-33 176 59 59 69 1 182-68 40-167-8l-126-120Z"/>
+  </g>
+  <path d="M496 405q61 31 113 10M409 506q68 28 137 2M431 650q70 1 124-34M544 806q91 26 159-13M672 908q87 9 146-28M1012 427q-43 34-51 86M1080 516q-55 29-68 72" fill="none" stroke="#2d5a68" stroke-width="18" stroke-linecap="round" opacity=".7"/>
+
+  <!-- face, hair, beard -->
+  <path class="ink" d="M825 269q57-66 139-38 70 23 65 94-4 55-58 79-54 25-107-12-57-40-39-123Z" fill="#a86634"/>
+  <path class="thin" d="M861 284q29-18 55 1M966 277q22-10 39 8" fill="none" stroke="#452c1d"/>
+  <circle cx="904" cy="303" r="8" fill="#9ab29b"/><circle cx="983" cy="299" r="8" fill="#9ab29b"/>
+  <path class="thin" d="M946 296l-13 54 34 4M925 376q33 14 61-3" fill="none" stroke="#5c321f"/>
+  <path class="ink" d="M824 278q-59 32-106 2 47 54 99 73l51-19q-25 76 13 163 13-60 47-91 8 88 52 119 4-83 39-128 41-52 3-76-17 45-53 46-20-5-32-28-8 27-36 27-29-5-36-38Z" fill="#d7ceb0"/>
+  <path d="M861 374q26 39 31 93M929 380q-13 55-2 109M977 389q-26 46-23 89" fill="none" stroke="#a99f83" stroke-width="9" stroke-linecap="round"/>
+  <path class="ink" d="M812 265q-70-12-105 55 60-17 115 31 0-38 31-76Z" fill="#39483e"/>
+
+  <!-- football and carrying arm -->
+  <path class="ink" d="M538 525q63-69 147-55 74 13 108 91-36 85-111 96-85 13-151-53-16-41 7-79Z" fill="#8b4e1f"/>
+  <path d="M580 498q68 48 151 129M664 520l-34 52M646 524l51 29M632 539l51 29M620 555l50 29" fill="none" stroke="#c79b62" stroke-width="9" stroke-linecap="round"/>
+  <path class="ink" d="M550 488q-43 13-70 62-20 37 10 72 45 54 116 50 55-4 106-44-73 15-103-22 53-11 69-58 10-28-14-38-18-6-34 19-19 30-49 22-27-8-31-63Z" fill="#ae7040"/>
+
+  <!-- reaching arm and hand -->
+  <path class="ink" d="M1041 506q48 54 74 82 19 18 52 6l45-20-31-35q-18-24 4-35 17-7 31 19l26 38 37-58q14-23 31-12 15 11 3 34l-28 53 63-34q27-14 38 7 8 21-17 35l-60 32 62 11q29 6 25 29-5 23-34 18l-66-10 48 45q21 20 4 39-18 18-40-2l-75-66q-40 13-79-7-65-32-109-86Z" fill="#ae7040"/>
+
+  <!-- belt and boots -->
+  <path d="M646 692q104 35 200 87" fill="none" stroke="#4c3320" stroke-width="26"/>
+  <rect x="750" y="724" width="52" height="45" rx="6" fill="#b18945" stroke="#291f18" stroke-width="9" transform="rotate(25 776 746)"/>
+  <path class="ink" d="M454 873q-63 26-95 92-16 33 14 50 48 26 102-59l36-58Z" fill="#26332e"/>
+  <path class="ink" d="M543 934q-31 46-12 75 18 25 58 2l61-58Z" fill="#26332e"/>
+</svg>
