@@ -51,6 +51,45 @@ actor PlayerInformationService {
         return summary
     }
 
+    func streamingSummary(
+        for player: FantasyPlayer,
+        refresh: Bool = false,
+        onPartialSummary: @Sendable @escaping (PlayerInformationSummary) async -> Void
+    ) async throws -> PlayerInformationSummary {
+        if !refresh, let cached = cache[player.id] {
+            return cached
+        }
+
+        let urls = player.profileURLs
+        guard !urls.isEmpty else {
+            throw PlayerInformationError.noSources
+        }
+
+        let excerpts = await fetchExcerpts(from: urls, playerName: player.fullName)
+        guard !excerpts.isEmpty else {
+            throw PlayerInformationError.noReadableSourceText
+        }
+
+        let sourceURLs = excerpts.map(\.profileURL)
+        let prompt = Self.makePrompt(player: player, excerpts: excerpts)
+        let modelSummary = await streamSummaryWithFoundationModel(prompt: prompt) { partialText in
+            let partialSummary = PlayerInformationSummary(
+                text: partialText,
+                sourceURLs: sourceURLs,
+                usedFoundationModel: true
+            )
+            await onPartialSummary(partialSummary)
+        }
+        let summary = PlayerInformationSummary(
+            text: modelSummary ?? Self.makeExtractiveSummary(player: player, excerpts: excerpts),
+            sourceURLs: sourceURLs,
+            usedFoundationModel: modelSummary != nil
+        )
+
+        cache[player.id] = summary
+        return summary
+    }
+
     private func fetchExcerpts(from urls: [PlayerProfileURL], playerName: String) async -> [PlayerSourceExcerpt] {
         await withTaskGroup(of: PlayerSourceExcerpt?.self) { group in
             for profileURL in urls {
@@ -147,6 +186,22 @@ actor PlayerInformationService {
 
         return nil
     }
+
+    private func streamSummaryWithFoundationModel(
+        prompt: String,
+        onPartialSummary: @Sendable @escaping (String) async -> Void
+    ) async -> String? {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            return await FoundationModelPlayerSummaryGenerator.streamSummary(
+                prompt: prompt,
+                onPartialSummary: onPartialSummary
+            )
+        }
+        #endif
+
+        return nil
+    }
 }
 
 private struct PlayerSourceExcerpt: Sendable {
@@ -171,17 +226,44 @@ enum PlayerInformationError: LocalizedError {
 #if canImport(FoundationModels)
 @available(macOS 26.0, *)
 private enum FoundationModelPlayerSummaryGenerator {
+    private static let instructions = """
+    You summarize NFL fantasy football player research. Use only the supplied excerpts.
+    Write one short paragraph followed by three concise bullets. Mention uncertainty when the source text is thin or stale.
+    """
+
     static func summarize(prompt: String) async -> String? {
         guard SystemLanguageModel.default.isAvailable else { return nil }
 
         do {
-            let session = LanguageModelSession(instructions: """
-            You summarize NFL fantasy football player research. Use only the supplied excerpts.
-            Write one short paragraph followed by three concise bullets. Mention uncertainty when the source text is thin or stale.
-            """)
+            let session = LanguageModelSession(instructions: instructions)
             let response = try await session.respond(to: prompt)
             let summary = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
             return summary.isEmpty ? nil : summary
+        } catch {
+            return nil
+        }
+    }
+
+    static func streamSummary(
+        prompt: String,
+        onPartialSummary: @Sendable @escaping (String) async -> Void
+    ) async -> String? {
+        guard SystemLanguageModel.default.isAvailable else { return nil }
+
+        do {
+            let session = LanguageModelSession(instructions: instructions)
+            let stream = session.streamResponse(to: prompt)
+            var finalSummary = ""
+
+            for try await snapshot in stream {
+                let summary = snapshot.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !summary.isEmpty else { continue }
+
+                finalSummary = summary
+                await onPartialSummary(summary)
+            }
+
+            return finalSummary.isEmpty ? nil : finalSummary
         } catch {
             return nil
         }

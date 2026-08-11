@@ -281,6 +281,16 @@ struct PlayerHeadshot: View {
 }
 
 struct PlayerInformationSummaryView: View {
+    private struct SummaryMarkdownBlock: Identifiable {
+        enum Kind {
+            case paragraph(String)
+            case bullet(String)
+        }
+
+        let id: Int
+        let kind: Kind
+    }
+
     @Environment(\.modelContext) private var modelContext
     let player: FantasyPlayer
     @State private var loadState: LoadState = .idle
@@ -304,23 +314,10 @@ struct PlayerInformationSummaryView: View {
             case .idle, .loading:
                 ProgressView("Loading player information...")
                     .controlSize(.small)
+            case .streaming(let summary):
+                summaryContent(summary, isStreaming: true)
             case .loaded(let summary):
-                Text(summary.text)
-                    .font(.body)
-                    .textSelection(.enabled)
-
-                if !summary.sourceURLs.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(summary.usedFoundationModel ? "This is an AI Summarization" : "Foundation Models unavailable; showing source excerpt")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        ForEach(summary.sourceURLs, id: \.self) { profileURL in
-                            Link(profileURL.source, destination: profileURL.url)
-                                .font(.caption)
-                        }
-                    }
-                }
+                summaryContent(summary)
             case .failed(let message):
                 ContentUnavailableView("Summary Unavailable", systemImage: "text.page.badge.magnifyingglass", description: Text(message))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -330,6 +327,95 @@ struct PlayerInformationSummaryView: View {
         .task(id: player.id) {
             loadSummary()
         }
+    }
+
+    @ViewBuilder
+    private func summaryContent(_ summary: PlayerInformationSummary, isStreaming: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(markdownBlocks(from: summary.text)) { block in
+                switch block.kind {
+                case .paragraph(let text):
+                    markdownText(text)
+                case .bullet(let text):
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("•")
+                            .font(.body)
+                        markdownText(text)
+                    }
+                }
+            }
+        }
+        .font(.body)
+        .textSelection(.enabled)
+
+        if !summary.sourceURLs.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    if isStreaming {
+                        ProgressView()
+                            .controlSize(.mini)
+                    }
+
+                    Text(summary.usedFoundationModel ? "This is an AI Summarization" : "Foundation Models unavailable; showing source excerpt")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                ForEach(summary.sourceURLs, id: \.self) { profileURL in
+                    Link(profileURL.source, destination: profileURL.url)
+                        .font(.caption)
+                }
+            }
+        }
+    }
+
+    private func markdownBlocks(from markdown: String) -> [SummaryMarkdownBlock] {
+        var blocks: [SummaryMarkdownBlock] = []
+        var paragraphLines: [String] = []
+
+        func appendParagraphIfNeeded() {
+            let paragraph = paragraphLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !paragraph.isEmpty {
+                blocks.append(SummaryMarkdownBlock(id: blocks.count, kind: .paragraph(paragraph)))
+            }
+            paragraphLines.removeAll()
+        }
+
+        for line in markdown.components(separatedBy: .newlines) {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+
+            if trimmedLine.isEmpty {
+                appendParagraphIfNeeded()
+            } else if let bulletText = bulletText(from: trimmedLine) {
+                appendParagraphIfNeeded()
+                blocks.append(SummaryMarkdownBlock(id: blocks.count, kind: .bullet(bulletText)))
+            } else {
+                paragraphLines.append(line)
+            }
+        }
+
+        appendParagraphIfNeeded()
+        return blocks
+    }
+
+    private func bulletText(from line: String) -> String? {
+        let bulletMarkers = ["- ", "* "]
+
+        for marker in bulletMarkers where line.hasPrefix(marker) {
+            return String(line.dropFirst(marker.count)).trimmingCharacters(in: .whitespaces)
+        }
+
+        return nil
+    }
+
+    private func markdownText(_ markdown: String) -> Text {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+
+        guard let attributedString = try? AttributedString(markdown: markdown, options: options) else {
+            return Text(markdown)
+        }
+
+        return Text(attributedString)
     }
 
     private func loadSummary(refresh: Bool = false) {
@@ -342,7 +428,11 @@ struct PlayerInformationSummaryView: View {
 
         Task {
             do {
-                let summary = try await PlayerInformationService.shared.summary(for: player, refresh: refresh)
+                let summary = try await PlayerInformationService.shared.streamingSummary(for: player, refresh: refresh) { partialSummary in
+                    await MainActor.run {
+                        loadState = .streaming(partialSummary)
+                    }
+                }
                 await MainActor.run {
                     player.storeSummary(summary)
 
@@ -364,12 +454,17 @@ struct PlayerInformationSummaryView: View {
     private enum LoadState {
         case idle
         case loading
+        case streaming(PlayerInformationSummary)
         case loaded(PlayerInformationSummary)
         case failed(String)
 
         var isLoading: Bool {
-            if case .loading = self { return true }
-            return false
+            switch self {
+            case .loading, .streaming:
+                return true
+            case .idle, .loaded, .failed:
+                return false
+            }
         }
     }
 }
