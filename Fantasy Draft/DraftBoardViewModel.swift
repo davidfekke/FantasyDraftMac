@@ -12,6 +12,7 @@ final class DraftBoardViewModel {
     var searchText = ""
     var selectedPosition: String?
     var selectedPlayer: FantasyPlayer?
+    var automaticallySelectsFirstPlayer = true
     var isLoading = false
     var errorMessage: String?
 
@@ -41,7 +42,7 @@ final class DraftBoardViewModel {
 
         do {
             players = try await playerLoader.loadPlayers(modelContext: modelContext)
-            selectedPlayer = players.first
+            selectedPlayer = automaticallySelectsFirstPlayer ? players.first : nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -96,6 +97,6 @@ final class DraftBoardViewModel {
             return
         }
 
-        selectedPlayer = visiblePlayers.first
+        selectedPlayer = automaticallySelectsFirstPlayer ? visiblePlayers.first : nil
     }
 }

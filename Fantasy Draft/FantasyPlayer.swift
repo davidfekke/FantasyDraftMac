@@ -3,8 +3,8 @@ import SwiftData
 
 @Model
 final class FantasyPlayer: Identifiable {
-    @Attribute(.unique) var id: String
-    var fullName: String
+    var id: String = ""
+    var fullName: String = ""
     var position: String?
     var team: String?
     var teamAbbreviation: String?
@@ -22,11 +22,11 @@ final class FantasyPlayer: Identifiable {
     var number: Int?
     var status: String?
     var birthDate: String?
-    var isPicked: Bool
+    var isPicked: Bool = false
     var generatedSummaryText: String?
-    var generatedSummaryUsedFoundationModel: Bool
-    var generatedSummarySourceNames: [String]
-    var generatedSummarySourceURLStrings: [String]
+    var generatedSummaryUsedFoundationModel: Bool = false
+    var generatedSummarySourceNames: [String] = []
+    var generatedSummarySourceURLStrings: [String] = []
 
     init(id: String, fullName: String, draftItem: DraftItem) {
         self.id = id

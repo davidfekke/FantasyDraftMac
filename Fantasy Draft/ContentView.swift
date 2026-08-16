@@ -3,8 +3,13 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    #if !os(macOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
+
     @Bindable var viewModel: DraftBoardViewModel
     @State private var presentedPlayer: FantasyPlayer?
+    @State private var isShowingSettings = false
 
     var body: some View {
         NavigationSplitView {
@@ -14,12 +19,42 @@ struct ContentView: View {
             detailPane
         }
         .task {
+            #if os(macOS)
+            viewModel.automaticallySelectsFirstPlayer = true
+            #else
+            viewModel.automaticallySelectsFirstPlayer = false
+            #endif
+
             await viewModel.loadPlayers(modelContext: modelContext)
         }
         .sheet(item: $presentedPlayer) { player in
             PlayerDetailSheet(player: player)
                 .presentationSizing(.form)
         }
+        #if !os(macOS)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isShowingSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+            }
+        }
+        .sheet(isPresented: $isShowingSettings) {
+            NavigationStack {
+                SettingsView(viewModel: viewModel)
+                    .navigationTitle("Settings")
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") {
+                                isShowingSettings = false
+                            }
+                        }
+                    }
+            }
+        }
+        #endif
     }
 
     private var sidebar: some View {
@@ -53,19 +88,21 @@ struct ContentView: View {
                 .controlSize(.regular)
             }
 
-            HStack(spacing: 8) {
-                Button("Clear") {
-                    viewModel.clearSearch()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    Button("Clear") {
+                        viewModel.clearSearch()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
 
-                ForEach(viewModel.positionFilters, id: \.self) { position in
-                    Toggle(position, isOn: Binding(
-                        get: { viewModel.selectedPosition == position },
-                        set: { _ in viewModel.togglePosition(position) }
-                    ))
-                    .toggleStyle(.checkbox)
+                    ForEach(viewModel.positionFilters, id: \.self) { position in
+                        Button(position) {
+                            viewModel.togglePosition(position)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(viewModel.selectedPosition == position ? .blue : .secondary)
+                    }
                 }
             }
 
@@ -85,6 +122,7 @@ struct ContentView: View {
         } else if viewModel.visiblePlayers.isEmpty {
             ContentUnavailableView("No Players", systemImage: "magnifyingglass", description: Text("Try a different search or position filter."))
         } else {
+            #if os(macOS)
             List(selection: Binding(
                 get: { viewModel.selectedPlayer?.id },
                 set: { playerID in
@@ -104,6 +142,46 @@ struct ContentView: View {
                 }
             }
             .listStyle(.inset)
+            #else
+            if horizontalSizeClass == .regular {
+                List(selection: Binding(
+                    get: { viewModel.selectedPlayer?.id },
+                    set: { playerID in
+                        guard let playerID, let player = viewModel.visiblePlayers.first(where: { $0.id == playerID }) else { return }
+                        viewModel.select(player)
+                    }
+                )) {
+                    ForEach(viewModel.visiblePlayers) { player in
+                        PlayerRow(
+                            player: player,
+                            isPicked: player.isPicked,
+                            onTogglePicked: { togglePicked(player) },
+                            onShowInfo: { viewModel.select(player) }
+                        )
+                        .tag(player.id)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                    }
+                }
+                .listStyle(.inset)
+            } else {
+                List {
+                    ForEach(viewModel.visiblePlayers) { player in
+                        PlayerRow(
+                            player: player,
+                            isPicked: player.isPicked,
+                            onTogglePicked: { togglePicked(player) },
+                            onShowInfo: { presentedPlayer = player }
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            presentedPlayer = player
+                        }
+                        .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                    }
+                }
+                .listStyle(.inset)
+            }
+            #endif
         }
     }
 
@@ -240,7 +318,7 @@ struct PlayerDetailSheet: View {
                 PlayerInformationSummaryView(player: player)
             }
             .padding(24)
-            .frame(width: 560, alignment: .leading)
+            .frame(maxWidth: 560, alignment: .leading)
         }
     }
 

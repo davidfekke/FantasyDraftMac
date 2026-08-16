@@ -179,7 +179,7 @@ actor PlayerInformationService {
 
     private func summarizeWithFoundationModel(prompt: String) async -> String? {
         #if canImport(FoundationModels)
-        if #available(macOS 26.0, *) {
+        if #available(macOS 26.0, iOS 26.0, *) {
             return await FoundationModelPlayerSummaryGenerator.summarize(prompt: prompt)
         }
         #endif
@@ -192,7 +192,7 @@ actor PlayerInformationService {
         onPartialSummary: @Sendable @escaping (String) async -> Void
     ) async -> String? {
         #if canImport(FoundationModels)
-        if #available(macOS 26.0, *) {
+        if #available(macOS 26.0, iOS 26.0, *) {
             return await FoundationModelPlayerSummaryGenerator.streamSummary(
                 prompt: prompt,
                 onPartialSummary: onPartialSummary
@@ -224,7 +224,7 @@ enum PlayerInformationError: LocalizedError {
 }
 
 #if canImport(FoundationModels)
-@available(macOS 26.0, *)
+@available(macOS 26.0, iOS 26.0, *)
 private enum FoundationModelPlayerSummaryGenerator {
     private static let instructions = """
     You summarize NFL fantasy football player research. Use only the supplied excerpts.

@@ -3,18 +3,24 @@ import SwiftUI
 
 @main
 struct Fantasy_DraftApp: App {
+    #if os(macOS)
     @Environment(\.openWindow) private var openWindow
+    #endif
+
     @State private var viewModel = DraftBoardViewModel()
 
     private let modelContainer: ModelContainer = {
+        let configuration = ModelConfiguration(cloudKitDatabase: .automatic)
+
         do {
-            return try ModelContainer(for: FantasyPlayer.self)
+            return try ModelContainer(for: FantasyPlayer.self, configurations: configuration)
         } catch {
             fatalError("Unable to create SwiftData container: \(error.localizedDescription)")
         }
     }()
 
     var body: some Scene {
+        #if os(macOS)
         WindowGroup {
             ContentView(viewModel: viewModel)
         }
@@ -32,9 +38,13 @@ struct Fantasy_DraftApp: App {
         }
         .windowResizability(.contentSize)
 
-        #if os(macOS)
         Settings {
             SettingsView(viewModel: viewModel)
+        }
+        .modelContainer(modelContainer)
+        #else
+        WindowGroup {
+            ContentView(viewModel: viewModel)
         }
         .modelContainer(modelContainer)
         #endif
@@ -91,7 +101,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(width: 420)
+        .frame(maxWidth: 420)
     }
 
     private func updatePlayerData() {

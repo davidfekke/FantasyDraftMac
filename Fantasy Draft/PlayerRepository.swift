@@ -81,7 +81,21 @@ struct BundledPlayerRepository: PlayerLoading {
     @MainActor
     private func upsertPlayers(from draftItems: [(id: String, item: DraftItem, fullName: String)], modelContext: ModelContext) throws -> [FantasyPlayer] {
         let existingPlayers = try modelContext.fetch(FetchDescriptor<FantasyPlayer>())
-        var playersByID = Dictionary(uniqueKeysWithValues: existingPlayers.map { ($0.id, $0) })
+        var playersByID: [String: FantasyPlayer] = [:]
+
+        for player in existingPlayers {
+            if let existing = playersByID[player.id] {
+                if player.isPicked && !existing.isPicked {
+                    modelContext.delete(existing)
+                    playersByID[player.id] = player
+                } else {
+                    modelContext.delete(player)
+                }
+            } else {
+                playersByID[player.id] = player
+            }
+        }
+
         var activeIDs = Set<String>()
 
         for draftItem in draftItems {
