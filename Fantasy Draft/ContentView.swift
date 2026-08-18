@@ -100,8 +100,7 @@ struct ContentView: View {
                         Button(position) {
                             viewModel.togglePosition(position)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(viewModel.selectedPosition == position ? .blue : .secondary)
+                        .buttonStyle(PositionFilterButtonStyle(isSelected: viewModel.selectedPosition == position))
                     }
                 }
             }
@@ -205,6 +204,45 @@ struct ContentView: View {
         } catch {
             viewModel.errorMessage = error.localizedDescription
         }
+    }
+}
+
+private struct PositionFilterButtonStyle: ButtonStyle {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.body.weight(.semibold))
+            .foregroundStyle(isSelected ? .white : .primary)
+            .padding(.horizontal, 12)
+            .frame(height: 30)
+            .background {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(backgroundColor)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(borderColor)
+            }
+            .opacity(configuration.isPressed ? 0.75 : 1)
+    }
+
+    private var backgroundColor: Color {
+        if isSelected {
+            return .blue
+        }
+
+        return colorScheme == .dark ? .white.opacity(0.14) : .black.opacity(0.08)
+    }
+
+    private var borderColor: Color {
+        if isSelected {
+            return .blue
+        }
+
+        return colorScheme == .dark ? .white.opacity(0.18) : .black.opacity(0.16)
     }
 }
 

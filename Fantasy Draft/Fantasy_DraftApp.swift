@@ -10,7 +10,7 @@ struct Fantasy_DraftApp: App {
     @State private var viewModel = DraftBoardViewModel()
 
     private let modelContainer: ModelContainer = {
-        let configuration = ModelConfiguration(cloudKitDatabase: .automatic)
+        let configuration = ModelConfiguration(cloudKitDatabase: .private("iCloud.com.fekke.Fantasy-Draft"))
 
         do {
             return try ModelContainer(for: FantasyPlayer.self, configurations: configuration)
