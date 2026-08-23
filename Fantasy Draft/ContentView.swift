@@ -305,7 +305,13 @@ struct PlayerDetailView: View {
                         Text("\(display(player.position)) | \(display(player.displayTeam))")
                             .font(.title3)
                             .foregroundStyle(.secondary)
-
+                        if let abbreviation = player.displayTeam?
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .uppercased(),
+                           let team = NFLTeam(rawValue: abbreviation) {
+                            Text("Bye Week \(team.byeWeek)")
+                                .foregroundStyle(.secondary)
+                        }
                         Button(isPicked ? "Mark Available" : "Mark Picked") {
                             onTogglePicked()
                         }
@@ -342,6 +348,13 @@ struct PlayerDetailSheet: View {
                         Text("\(display(player.position)) | \(display(player.displayTeam))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                        if let abbreviation = player.displayTeam?
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .uppercased(),
+                           let team = NFLTeam(rawValue: abbreviation) {
+                            Text("Bye Week \(team.byeWeek)")
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     Spacer()
