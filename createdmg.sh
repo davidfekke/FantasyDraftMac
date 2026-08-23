@@ -2,8 +2,8 @@
 set -euo pipefail
 
 APP_NAME="Fantasy Draft"
-VERSION="1.0.10"
 APP_PATH="./Export/${APP_NAME}.app"
+VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Contents/Info.plist")
 DMG_NAME="${APP_NAME}-${VERSION}.dmg"
 VOLUME_NAME="${APP_NAME}"
 NOTARY_PROFILE="fantasy-draft-notary"
