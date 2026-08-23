@@ -10,6 +10,7 @@
 		B27C5485302913DE0001C37D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = README.md; sourceTree = "<group>"; };
 		B27CC4293028F5890001C37D /* Fantasy Draft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fantasy Draft.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B27CC43B3028F64C0001C37D /* agent.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = agent.md; sourceTree = "<group>"; };
+		B2AC6937303B3A6F0053B898 /* createdmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createdmg.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +46,7 @@
 		B27CC4203028F5890001C37D = {
 			isa = PBXGroup;
 			children = (
+				B2AC6937303B3A6F0053B898 /* createdmg.sh */,
 				B27C5485302913DE0001C37D /* README.md */,
 				B27CC43B3028F64C0001C37D /* agent.md */,
 				B27CC42B3028F5890001C37D /* Fantasy Draft */,
