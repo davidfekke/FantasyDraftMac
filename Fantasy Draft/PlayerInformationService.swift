@@ -14,10 +14,15 @@ actor PlayerInformationService {
     static let shared = PlayerInformationService()
 
     private let session: URLSession
+    private let openAISummarizer: any OpenAIPlayerSummarizing
     private var cache: [FantasyPlayer.ID: PlayerInformationSummary] = [:]
 
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        openAISummarizer: any OpenAIPlayerSummarizing = OpenAIPlayerSummaryService()
+    ) {
         self.session = session
+        self.openAISummarizer = openAISummarizer
     }
 
     func clearCache() {
@@ -40,7 +45,7 @@ actor PlayerInformationService {
         }
 
         let prompt = Self.makePrompt(player: player, excerpts: excerpts)
-        let modelSummary = await summarizeWithFoundationModel(prompt: prompt)
+        let modelSummary = await summarize(prompt: prompt)
         let summary = PlayerInformationSummary(
             text: modelSummary ?? Self.makeExtractiveSummary(player: player, excerpts: excerpts),
             sourceURLs: excerpts.map(\.profileURL),
@@ -72,7 +77,7 @@ actor PlayerInformationService {
 
         let sourceURLs = excerpts.map(\.profileURL)
         let prompt = Self.makePrompt(player: player, excerpts: excerpts)
-        let modelSummary = await streamSummaryWithFoundationModel(prompt: prompt) { partialText in
+        let modelSummary = await streamSummary(prompt: prompt) { partialText in
             let partialSummary = PlayerInformationSummary(
                 text: partialText,
                 sourceURLs: sourceURLs,
@@ -174,7 +179,61 @@ actor PlayerInformationService {
         let combinedText = excerpts.map(\.text).joined(separator: " ")
         let clipped = String(combinedText.prefix(700))
 
-        return "\(player.fullName) profile information was found from \(sourceList), but Apple Foundation Models was not available to generate a summary. Source excerpt: \(clipped)"
+        return "\(player.fullName) profile information was found from \(sourceList), but the selected language model was not available to generate a summary. Source excerpt: \(clipped)"
+    }
+
+    private func summarize(prompt: String) async -> String? {
+        switch PlayerSummaryProvider.selected {
+        case .appleFoundationModels:
+            return await summarizeWithFoundationModel(prompt: prompt)
+        case .openAI:
+            return await summarizeWithOpenAI(prompt: prompt)
+        }
+    }
+
+    private func streamSummary(
+        prompt: String,
+        onPartialSummary: @Sendable @escaping (String) async -> Void
+    ) async -> String? {
+        switch PlayerSummaryProvider.selected {
+        case .appleFoundationModels:
+            return await streamSummaryWithFoundationModel(
+                prompt: prompt,
+                onPartialSummary: onPartialSummary
+            )
+        case .openAI:
+            return await streamSummarizeWithOpenAI(
+                prompt: prompt,
+                onPartialSummary: onPartialSummary
+            )
+        }
+    }
+
+    private func summarizeWithOpenAI(prompt: String) async -> String? {
+        guard let apiKey = OpenAICredentialStore.apiKey() else { return nil }
+
+        do {
+            return try await openAISummarizer.summarize(prompt: prompt, apiKey: apiKey)
+        } catch {
+            return nil
+        }
+    }
+
+    private func streamSummarizeWithOpenAI(
+        prompt: String,
+        onPartialSummary: @Sendable @escaping (String) async -> Void
+    ) async -> String? {
+        guard let apiKey = OpenAICredentialStore.apiKey() else { return nil }
+
+        do {
+            return try await openAISummarizer.streamSummarize(
+                prompt: prompt,
+                apiKey: apiKey,
+                onPartialSummary: onPartialSummary
+            )
+        } catch {
+            return nil
+        }
     }
 
     private func summarizeWithFoundationModel(prompt: String) async -> String? {

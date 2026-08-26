@@ -53,15 +53,53 @@ struct Fantasy_DraftApp: App {
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage(PlayerSummaryProvider.defaultsKey) private var summaryProvider = PlayerSummaryProvider.appleFoundationModels.rawValue
     @State private var isUpdating = false
     @State private var isResetting = false
     @State private var statusMessage: String?
+    @State private var openAIAPIKey = ""
+    @State private var openAIStatusMessage: String?
 
     private let dataStore = PlayerDataStore()
     let viewModel: DraftBoardViewModel
 
     var body: some View {
         Form {
+            Section {
+                Picker("Summary provider", selection: $summaryProvider) {
+                    ForEach(PlayerSummaryProvider.allCases) { provider in
+                        Text(provider.title).tag(provider.rawValue)
+                    }
+                }
+
+                SecureField("OpenAI API key", text: $openAIAPIKey)
+                    .textContentType(.password)
+
+                HStack {
+                    Button("Save Key") {
+                        saveOpenAIAPIKey()
+                    }
+                    .disabled(openAIAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    Button("Remove Key", role: .destructive) {
+                        removeOpenAIAPIKey()
+                    }
+                    .disabled(OpenAICredentialStore.apiKey() == nil)
+                }
+
+                Text("The key is stored in this Mac's Keychain. Player source excerpts are sent to OpenAI when this provider is selected.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if let openAIStatusMessage {
+                    Text(openAIStatusMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Player Summaries")
+            }
+
             Section {
                 Button {
                     updatePlayerData()
@@ -101,7 +139,18 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(maxWidth: 420)
+        .frame(minWidth: 520, minHeight: 460)
+        .onAppear {
+            openAIAPIKey = OpenAICredentialStore.apiKey() ?? ""
+        }
+        .onChange(of: summaryProvider) { _, _ in
+            Task {
+                await PlayerInformationService.shared.clearCache()
+            }
+        }
+        .onDisappear {
+            openAIAPIKey = ""
+        }
     }
 
     private func updatePlayerData() {
@@ -135,6 +184,31 @@ struct SettingsView: View {
             }
 
             isResetting = false
+        }
+    }
+
+    private func saveOpenAIAPIKey() {
+        do {
+            try OpenAICredentialStore.save(apiKey: openAIAPIKey)
+            openAIStatusMessage = "OpenAI API key saved."
+            Task {
+                await PlayerInformationService.shared.clearCache()
+            }
+        } catch {
+            openAIStatusMessage = error.localizedDescription
+        }
+    }
+
+    private func removeOpenAIAPIKey() {
+        do {
+            try OpenAICredentialStore.deleteAPIKey()
+            openAIAPIKey = ""
+            openAIStatusMessage = "OpenAI API key removed."
+            Task {
+                await PlayerInformationService.shared.clearCache()
+            }
+        } catch {
+            openAIStatusMessage = error.localizedDescription
         }
     }
 }
