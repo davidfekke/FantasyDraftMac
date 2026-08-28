@@ -1,6 +1,12 @@
 import SwiftData
 import SwiftUI
 
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     #if !os(macOS)
@@ -326,11 +332,51 @@ struct PlayerDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .background {
+            PlayerDetailBackground()
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private func display(_ value: String?) -> String {
         guard let value, !value.isEmpty else { return "-" }
         return value
+    }
+}
+
+private struct PlayerDetailBackground: View {
+    var body: some View {
+        GeometryReader { proxy in
+            if let image = Self.bundleImage {
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .clipped()
+                    .opacity(0.22)
+                    .overlay(.background.opacity(0.68))
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private static var bundleImage: Image? {
+        guard let imageURL = Bundle.main.url(forResource: "fantasyfootball2", withExtension: "png") else {
+            return nil
+        }
+
+        #if os(macOS)
+        guard let image = NSImage(contentsOf: imageURL) else {
+            return nil
+        }
+        return Image(nsImage: image)
+        #else
+        guard let image = UIImage(contentsOfFile: imageURL.path) else {
+            return nil
+        }
+        return Image(uiImage: image)
+        #endif
     }
 }
 
