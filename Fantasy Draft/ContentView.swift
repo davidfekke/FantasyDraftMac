@@ -277,6 +277,16 @@ struct PlayerRow: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .strikethrough(isPicked)
+                
+                if let abbreviation = player.displayTeam?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .uppercased(),
+                   let team = NFLTeam(rawValue: abbreviation) {
+                    Text("Bye Week \(team.byeWeek)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .strikethrough(isPicked)
+                }
             }
 
             Spacer(minLength: 12)
